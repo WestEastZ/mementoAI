@@ -1,14 +1,8 @@
-import React, { useState, useCallback } from "react";
-import ReactDOM from "react-dom";
+import React, { useCallback, useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "react-beautiful-dnd";
+import { getItems } from "./ColumnData";
 
-function App() {
-  const getItems = (count) =>
-    Array.from({ length: count }, (v, k) => k).map((k) => ({
-      id: `item-${k}`,
-      content: `item ${k}`,
-    }));
-
+export default function App() {
   const [items, setItems] = useState(getItems(10));
 
   const reorder = (list, startIndex, endIndex) => {
@@ -84,5 +78,3 @@ const getListStyle = (isDraggingOver) => ({
   padding: GRID,
   width: 250,
 });
-
-ReactDOM.render(<App />, document.getElementById("root"));
