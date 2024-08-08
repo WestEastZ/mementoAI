@@ -10,9 +10,9 @@ export default function DragDropContext({
   onDragEnd,
   isDraggingOver,
   handleItemClick,
+  selectedItems,
 }) {
-  const { selectedItems, toggleItemSelect } = useDragAndDrop();
-
+  console.log(selectedItems);
   return (
     <BeautifulDndContext onDragEnd={onDragEnd} onDragUpdate={onDragUpdate}>
       <section className="m-10 flex justify-between">
@@ -38,11 +38,22 @@ export default function DragDropContext({
 
 const GRID = 8;
 
-const getItemStyle = (isDragging, draggableStyle, isDraggingOver) => ({
+const getItemStyle = (
+  isDragging,
+  draggableStyle,
+  isDraggingOver,
+  isSelected
+) => ({
   userSelect: "none",
   padding: GRID * 2,
   margin: `0 0 ${GRID}px 0`,
-  background: isDragging ? (isDraggingOver ? "red" : "lightgreen") : "grey",
+  background: isSelected
+    ? "lightgreen"
+    : isDragging
+    ? isDraggingOver
+      ? "red"
+      : "lightgreen"
+    : "grey",
   ...draggableStyle,
 });
 

@@ -10,6 +10,7 @@ export default function App() {
     onDragEnd,
     isDraggingOver,
     handleItemClick,
+    selectedItems,
   } = useDragAndDrop();
 
   return (
@@ -20,6 +21,7 @@ export default function App() {
       onDragEnd={onDragEnd}
       isDraggingOver={isDraggingOver}
       handleItemClick={handleItemClick}
+      selectedItems={selectedItems}
     />
   );
 }

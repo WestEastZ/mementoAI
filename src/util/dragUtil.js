@@ -13,25 +13,38 @@ export const canMoveItem = (
   destinationColId,
   sourceIndex,
   destinationIndex,
-  draggableId
+  draggableId,
+  selectedItems
 ) => {
-  // 1번 칼럼에서 3번 칼럼으로 이동 불가
+  // 1번 칼럼에서 3번 칼럼 이동 불가
   if (sourceColId === "col1" && destinationColId === "col3") {
     return false;
   }
 
-  // 원본 칼럼의 아이템
+  // 원본 칼럼
   const sourceItems = [...columns[sourceColId].items];
 
-  // 목적지 칼럼의 아이템
-  const destItems = [...columns[destinationColId].items];
+  // 목적지 칼럼
+  const destItems =
+    sourceColId === destinationColId
+      ? sourceItems
+      : [...columns[destinationColId].items];
 
   // 이동 아이템
-  const movedItem = sourceItems.find((item) => item.id === draggableId);
+  const itemsToMove = selectedItems.includes(draggableId)
+    ? selectedItems
+    : [draggableId];
 
-  if (!movedItem) {
-    return false;
-  }
+  const moveIndices = itemsToMove
+    .map((id) => sourceItems.findIndex((item) => item.id === id))
+    .sort((a, b) => a - b);
+
+  const newSourceItems = sourceItems.filter(
+    (_, index) => !moveIndices.includes(index)
+  );
+  const movedItems = moveIndices.map((index) => sourceItems[index]);
+  const newDestItems = [...destItems];
+  newDestItems.splice(destinationIndex, 0, ...movedItems);
 
   // 짝수 아이템 인접 여부 확인
   const hasAdjacentEvenItems = (items) => {
@@ -43,27 +56,10 @@ export const canMoveItem = (
     return false;
   };
 
-  // 이동 후 상태
-  const newSourceItems = sourceItems.filter((item) => item.id !== draggableId);
-
-  let newDestItems;
-  if (sourceColId === destinationColId) {
-    // 같은 칼럼 내 이동
-    newDestItems = newSourceItems;
-    newDestItems.splice(destinationIndex, 0, movedItem);
-  } else {
-    // 다른 칼럼으로 이동
-    newDestItems = [...destItems];
-    newDestItems.splice(destinationIndex, 0, movedItem);
-  }
-
-  // 원본 칼럼 검사 (같은 칼럼 내 이동 시 변경 후 칼럼만 검사)
   const sourceHasAdjacentEven =
     sourceColId !== destinationColId
       ? hasAdjacentEvenItems(newSourceItems)
       : false;
-
-  // 목적지 칼럼 검사
   const destHasAdjacentEven = hasAdjacentEvenItems(newDestItems);
 
   return !(sourceHasAdjacentEven || destHasAdjacentEven);

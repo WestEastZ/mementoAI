@@ -31,41 +31,48 @@ export default function useDragAndDrop() {
   const updateColumnItems = useCallback(
     (sourceColId, destColId, sourceIndex, destIndex, draggableId) => {
       return (prev) => {
-        // 같은 칼럼 내 이동
-        if (sourceColId === destColId) {
-          const column = prev[sourceColId];
-          const newItems = reorder(column.items, sourceIndex, destIndex);
+        const itemsToMove = selectedItems.includes(draggableId)
+          ? selectedItems
+          : [draggableId];
 
-          return {
-            ...prev,
-            [sourceColId]: {
-              ...column,
-              items: newItems,
-            },
-          };
+        const sourceCol = prev[sourceColId];
+        const destCol = sourceColId === destColId ? sourceCol : prev[destColId];
+
+        // 원본 칼럼에서 선택된 아이템 제거
+        const newSourceItems = sourceCol.items.filter(
+          (item) => !itemsToMove.includes(item.id)
+        );
+
+        // 선택된 아이템
+        const movedItems = sourceCol.items.filter((item) =>
+          itemsToMove.includes(item.id)
+        );
+
+        let newDestItems;
+        if (sourceColId === destColId) {
+          // 같은 칼럼 내 이동
+          newDestItems = [...newSourceItems];
+          newDestItems.splice(destIndex, 0, ...movedItems);
         } else {
           // 다른 칼럼으로 이동
-          const sourceCol = prev[sourceColId];
-          const destCol = prev[destColId];
-          const [movedItem] = sourceCol.items.splice(sourceIndex, 1);
-          const newDestItems = [...destCol.items];
-          newDestItems.splice(destIndex, 0, movedItem);
-
-          return {
-            ...prev,
-            [sourceColId]: {
-              ...sourceCol,
-              items: sourceCol.items,
-            },
-            [destColId]: {
-              ...destCol,
-              items: newDestItems,
-            },
-          };
+          newDestItems = [...destCol.items];
+          newDestItems.splice(destIndex, 0, ...movedItems);
         }
+
+        return {
+          ...prev,
+          [sourceColId]: {
+            ...sourceCol,
+            items: newSourceItems,
+          },
+          [destColId]: {
+            ...destCol,
+            items: newDestItems,
+          },
+        };
       };
     },
-    []
+    [selectedItems]
   );
 
   // Drag Update
@@ -83,7 +90,8 @@ export default function useDragAndDrop() {
         destination.droppableId,
         source.index,
         destination.index,
-        draggableId
+        draggableId,
+        selectedItems
       );
 
       // 원래 위치로 돌아가는 경우를 체크
@@ -91,34 +99,38 @@ export default function useDragAndDrop() {
         source.droppableId === destination.droppableId &&
         source.index === destination.index;
 
-      setIsDraggingOver(!canMove);
       setIsDraggingOver(!canMove && !isReturning);
 
       draggedItemRef.current = { source, destination, canMove };
     },
-    [columns]
+    [columns, selectedItems]
   );
 
   // Drag End
-  const onDragEnd = useCallback((result) => {
-    const { source, destination } = result;
-    setIsDraggingOver(false);
-    if (!destination || !draggedItemRef.current) return;
+  const onDragEnd = useCallback(
+    (result) => {
+      const { source, destination, draggableId } = result;
+      setIsDraggingOver(false);
+      if (!destination || !draggedItemRef.current) return;
 
-    if (draggedItemRef.current.canMove) {
-      setColumns(
-        updateColumnItems(
-          source.droppableId,
-          destination.droppableId,
-          source.index,
-          destination.index
-        )
-      );
-    } else if (draggedItemRef.current.canMove === false) {
-      setColumns((prev) => ({ ...prev }));
-    }
-    draggedItemRef.current = null;
-  }, []);
+      if (draggedItemRef.current.canMove) {
+        setColumns(
+          updateColumnItems(
+            source.droppableId,
+            destination.droppableId,
+            source.index,
+            destination.index,
+            draggableId
+          )
+        );
+      } else if (draggedItemRef.current.canMove === false) {
+        setColumns((prev) => ({ ...prev }));
+      }
+      draggedItemRef.current = null;
+      setSelectedItems([]);
+    },
+    [columns, selectedItems, updateColumnItems]
+  );
 
   return {
     columns,
