@@ -22,9 +22,6 @@ export const handleAddItem = (columns, setColumns) => {
 };
 
 export const handleDeleteItem = (colData, colId, itemId, setColumns) => {
-  console.log(colId);
-  console.log(colData);
-
   setColumns((prev) => {
     const updatedItems = prev[colData.name].items.filter(
       (item) => item.id !== itemId
