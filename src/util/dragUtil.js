@@ -1,4 +1,4 @@
-import { isEven } from "./isEven";
+import { hasAdjacentEvenItems, isEven } from "./isEven";
 
 export const reorder = (list, startIndex, endIndex) => {
   const result = Array.from(list);
@@ -35,26 +35,27 @@ export const canMoveItem = (
     ? selectedItems
     : [draggableId];
 
-  const moveIndices = itemsToMove
-    .map((id) => sourceItems.findIndex((item) => item.id === id))
-    .sort((a, b) => a - b);
-
-  const newSourceItems = sourceItems.filter(
-    (_, index) => !moveIndices.includes(index)
+  // 이동 아이템 추출
+  const movedItems = sourceItems.filter((item) =>
+    itemsToMove.includes(item.id)
   );
-  const movedItems = moveIndices.map((index) => sourceItems[index]);
-  const newDestItems = [...destItems];
-  newDestItems.splice(destinationIndex, 0, ...movedItems);
 
-  // 짝수 아이템 인접 여부 확인
-  const hasAdjacentEvenItems = (items) => {
-    for (let i = 0; i < items.length - 1; i++) {
-      if (isEven(items[i].id) && isEven(items[i + 1].id)) {
-        return true;
-      }
-    }
-    return false;
-  };
+  let newDestItems;
+  if (sourceColId === destinationColId) {
+    // 같은 칼럼 내 이동
+    newDestItems = sourceItems.filter((item) => !itemsToMove.includes(item.id));
+    newDestItems.splice(destinationIndex, 0, ...movedItems);
+  } else {
+    // 다른 칼럼으로 이동
+    newDestItems = [...destItems];
+    newDestItems.splice(destinationIndex, 0, ...movedItems);
+  }
+
+  // 새로운 원본 아이템 배열 생성 (다른 칼럼으로 이동하는 경우에만)
+  const newSourceItems =
+    sourceColId !== destinationColId
+      ? sourceItems.filter((item) => !itemsToMove.includes(item.id))
+      : sourceItems;
 
   const sourceHasAdjacentEven =
     sourceColId !== destinationColId
