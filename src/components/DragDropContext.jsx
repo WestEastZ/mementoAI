@@ -12,7 +12,6 @@ export default function DragDropContext({
   handleItemClick,
   selectedItems,
 }) {
-  console.log(selectedItems);
   return (
     <BeautifulDndContext onDragEnd={onDragEnd} onDragUpdate={onDragUpdate}>
       <section className="m-10 flex justify-between">

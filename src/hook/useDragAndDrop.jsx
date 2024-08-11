@@ -29,7 +29,7 @@ export default function useDragAndDrop() {
 
   // Column Update
   const updateColumnItems = useCallback(
-    (sourceColId, destColId, sourceIndex, destIndex, draggableId) => {
+    (sourceColId, destColId, destIndex, draggableId) => {
       return (prev) => {
         const itemsToMove = selectedItems.includes(draggableId)
           ? selectedItems
@@ -99,6 +99,7 @@ export default function useDragAndDrop() {
         source.droppableId === destination.droppableId &&
         source.index === destination.index;
 
+      // 아이템이 이동할 수 없고 원래 위치로 이동하고 있지 않는 경우
       setIsDraggingOver(!canMove && !isReturning);
 
       draggedItemRef.current = { source, destination, canMove };
@@ -118,7 +119,7 @@ export default function useDragAndDrop() {
           updateColumnItems(
             source.droppableId,
             destination.droppableId,
-            source.index,
+
             destination.index,
             draggableId
           )
