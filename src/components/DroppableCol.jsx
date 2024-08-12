@@ -19,14 +19,16 @@ export default function DroppableCol({
     <div className="flex flex-col items-center gap-5">
       <div className="flex justify-between gap-5">
         <div>{colData.name}</div>
-        <MultipleButton
-          name="add"
-          handleAddItem={handleAddItem}
-          handleDeleteItem={handleDeleteItem}
-          columns={columns}
-          setColumns={setColumns}
-          colData={colData}
-        />
+        {colData.name === "col1" ? (
+          <MultipleButton
+            name="add"
+            handleAddItem={handleAddItem}
+            handleDeleteItem={handleDeleteItem}
+            columns={columns}
+            setColumns={setColumns}
+            colData={colData}
+          />
+        ) : null}
       </div>
       <Droppable droppableId={colId}>
         {(provided, snapshot) => (
